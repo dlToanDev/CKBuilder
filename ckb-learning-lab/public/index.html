@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Create, inspect, and transfer sUDT tokens and custom TYPE_ID digital objects on your local CKB devnet.">
+  <title>CKB Learning Lab</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+  <script src="/dob.js" defer></script>
+  <script src="/lock-script.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <div><p class="eyebrow">CKBuilder / Local development</p><h1>CKB Learning Lab</h1><p>Local Blockchain Development Tools</p></div>
+      <span class="badge">Devnet only</span>
+    </header>
+
+    <section class="panel connection" aria-labelledby="connection-title">
+      <div><h2 id="connection-title">Devnet Connection</h2><p id="network">OffCKB Local Devnet</p><code id="rpc">http://127.0.0.1:8114</code></div>
+      <div class="connection-state"><p>Status: <strong id="status" role="status">Checking…</strong></p><p>Current Block: <strong id="block">—</strong></p></div>
+      <button id="refresh" type="button">Refresh data</button>
+    </section>
+    <p id="refresh-message" class="feedback" role="status" aria-live="polite"></p>
+
+    <nav aria-label="Learning modules" role="tablist">
+      <button id="tab-transfer" class="tab" data-module="transfer" type="button" role="tab" aria-selected="false" aria-controls="panel-transfer" tabindex="-1">CKB Transfer</button>
+      <button id="tab-cell" class="tab" data-module="cell" type="button" role="tab" aria-selected="false" aria-controls="panel-cell" tabindex="-1">Cell Data</button>
+      <button id="tab-token" class="tab active" data-module="token" type="button" role="tab" aria-selected="true" aria-controls="panel-token">Fungible Token</button>
+      <button id="tab-dob" class="tab" data-module="dob" type="button" role="tab" aria-selected="false" aria-controls="panel-dob" tabindex="-1">DOB</button>
+      <button id="tab-lock" class="tab" data-module="lock" type="button" role="tab" aria-selected="false" aria-controls="panel-lock" tabindex="-1">Lock Script</button>
+    </nav>
+
+        <section class="panel" aria-labelledby="wallet-title">
+          <div class="section-heading"><h3 id="wallet-title">Devnet accounts</h3><span class="muted">Account #0 — Creator / Sender · Account #1 — Receiver</span></div>
+          <p id="wallet-message" class="feedback" role="status">Loading accounts…</p>
+          <div id="accounts" class="accounts"></div>
+        </section>
+
+    <div id="module-content">
+      <section id="panel-token" role="tabpanel" aria-labelledby="tab-token">
+        <div class="module-heading"><div><p class="eyebrow">Module 04</p><h2>Fungible Token</h2><p>Create and transfer custom tokens on CKB Devnet.</p></div><span id="token-standard" class="badge">sUDT</span></div>
+        <p id="token-message" class="feedback" role="status" aria-live="polite">Loading token configuration…</p>
+
+        <div class="workflow-grid">
+          <section class="panel" aria-labelledby="create-title">
+            <p class="eyebrow">Step 1</p><h3 id="create-title">Create Custom Token</h3>
+            <form id="create-form">
+              <fieldset id="create-fields" class="step-fields" disabled>
+                <div class="field"><label for="token-name">Token Name</label><input id="token-name" name="name" value="CKBuilder Token" required autocomplete="off"></div>
+                <div class="field"><label for="token-symbol">Token Symbol</label><input id="token-symbol" name="symbol" value="CKBT" required autocomplete="off"></div>
+                <div class="field"><label for="initial-supply">Initial Supply</label><input id="initial-supply" name="initialSupply" value="1000" type="text" inputmode="numeric" pattern="[0-9]+" required aria-describedby="supply-help"></div>
+                <button id="create-token" class="primary" type="submit">Create Token</button>
+                <p id="supply-help" class="hint">Whole token units for Account 0. Positive integers only; up to 2¹²⁸ − 1.</p>
+              </fieldset>
+            </form>
+            <p id="create-message" class="feedback" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="panel" aria-labelledby="balance-title">
+            <p class="eyebrow">Step 2</p><h3 id="balance-title">Check Token Balance</h3>
+            <form id="balance-form" class="step-fields">
+              <div class="field field-wide"><label for="balance-address">Wallet address</label><input id="balance-address" name="address" placeholder="ckt1…" required autocomplete="off" spellcheck="false"></div>
+              <button id="check-balance" type="submit" disabled>Check Balance</button>
+            </form>
+            <p id="balance-message" class="feedback" role="status" aria-live="polite"></p>
+            <div id="balance-result" hidden><p class="balance-value"><strong id="balance-amount">—</strong> <span class="token-symbol"></span></p><p id="balance-owner" class="mono address"></p><details><summary>Inspect token cells</summary><pre id="balance-cells"></pre></details></div>
+          </section>
+
+          <section class="panel" aria-labelledby="transfer-title">
+            <p class="eyebrow">Step 3</p><h3 id="transfer-title">Transfer Custom Token</h3>
+            <form id="transfer-form">
+              <fieldset id="transfer-fields" class="step-fields" disabled>
+                <div class="field"><label for="receiver-account">Use a devnet account</label><select id="receiver-account"><option value="">Enter an address below</option></select></div>
+                <div class="field field-wide"><label for="receiver">Receiver address</label><input id="receiver" name="receiver" placeholder="ckt1…" required autocomplete="off" spellcheck="false"></div>
+                <div class="field"><label for="transfer-amount">Amount</label><input id="transfer-amount" name="amount" value="10" type="text" inputmode="numeric" pattern="[0-9]+" required></div>
+                <button id="transfer-token" class="primary" type="submit">Transfer Token</button>
+              </fieldset>
+            </form>
+            <p id="transfer-message" class="feedback" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="panel" aria-labelledby="config-title">
+            <p class="eyebrow">On-chain configuration</p><h3 id="config-title">Token &amp; script details</h3>
+            <p id="config-summary" class="muted">No token loaded.</p>
+            <dl id="token-config" class="metadata"></dl>
+            <details><summary>Inspect token type script</summary><pre id="type-script">No token created yet.</pre></details>
+            <details><summary>Inspect sUDT deployment &amp; cell dependencies</summary><pre id="script-info">Loading…</pre></details>
+          </section>
+        </div>
+
+        <section class="panel" aria-labelledby="history-title">
+          <div class="section-heading"><div><p class="eyebrow">Activity</p><h3 id="history-title">Transaction history</h3></div><span id="pending-count" class="badge" role="status">0 pending</span></div>
+          <p id="action-message" class="feedback" role="status" aria-live="polite"></p>
+          <button id="retry-submission" type="button" hidden>Retry same submission</button>
+          <p id="history-message" class="muted">Loading prior operations…</p>
+          <div class="table-scroll"><table id="history-table" hidden><caption class="sr-only">Mint and transfer operations. Inspect a transaction to see its outputs.</caption><thead><tr><th scope="col">Operation</th><th scope="col">Amount</th><th scope="col">Receiver</th><th scope="col">Transaction hash</th><th scope="col">Status</th><th scope="col">Details</th></tr></thead><tbody id="history-body"></tbody></table></div>
+        </section>
+
+        <section class="panel" aria-labelledby="transaction-title">
+          <div class="section-heading"><div><p class="eyebrow">Cell explorer</p><h3 id="transaction-title">Transaction inspection</h3></div><button id="refresh-transaction" type="button" disabled>Refresh transaction</button></div>
+          <form id="transaction-form" class="inline-form"><div><label for="transaction-hash">Transaction hash</label><input id="transaction-hash" name="hash" placeholder="0x… (64 hex characters)" pattern="0x[0-9a-fA-F]{64}" required autocomplete="off" spellcheck="false"></div><button id="inspect-transaction" type="submit">Inspect</button></form>
+          <p id="transaction-message" class="feedback" role="status" aria-live="polite">Select a prior transaction or enter its hash.</p>
+          <div id="transaction-detail" hidden>
+            <div class="hash-row"><code id="selected-hash"></code><button id="copy-hash" type="button">Copy hash</button><span id="selected-status" class="badge"></span></div>
+            <dl id="transaction-meta" class="metadata"></dl>
+            <h4>Transaction outputs</h4><p class="hint">Each output shows capacity in shannon, token units, lock and type scripts, and raw cell data.</p>
+            <div id="transaction-outputs" class="outputs"></div>
+            <details><summary>Inspect full transaction response</summary><pre id="transaction-json"></pre></details>
+          </div>
+        </section>
+      </section>
+      <section id="panel-transfer" class="panel placeholder" role="tabpanel" aria-labelledby="tab-transfer" hidden><h2>02 — CKB Transfer</h2><p>Transfer CKB between Devnet accounts.</p><p class="muted">Module will be implemented later.</p></section>
+      <section id="panel-cell" class="panel placeholder" role="tabpanel" aria-labelledby="tab-cell" hidden><h2>03 — Cell Data</h2><p>Store and read data from CKB Cells.</p><p class="muted">Module will be implemented later.</p></section>
+      <section id="panel-dob" role="tabpanel" aria-labelledby="tab-dob" hidden>
+        <div class="module-heading"><div><p class="eyebrow">Module 05</p><h2>Digital Object (DOB)</h2><p>Create, read and transfer a digital object on your local CKB chain.</p></div><span class="badge">Custom Cell + TYPE_ID</span></div>
+        <p class="muted">This lab uses a custom Cell format. Name, description, content type and content are on-chain. It is not a Spore DOB. The app preserves content on transfer; TYPE_ID enforces a unique identity.</p>
+        <p id="dob-message" class="feedback" role="status" aria-live="polite">Open this module to load DOB records.</p>
+        <div class="workflow-grid">
+          <section class="panel" aria-labelledby="dob-create-title">
+            <p class="eyebrow">Step 1</p><h3 id="dob-create-title">Create Digital Object</h3>
+            <form id="dob-create-form"><fieldset id="dob-create-fields" class="step-fields" disabled>
+              <div class="field"><label for="dob-name">Object Name</label><input id="dob-name" value="My First CKB DOB" maxlength="128" required autocomplete="off"></div>
+              <div class="field field-wide"><label for="dob-description">Description</label><input id="dob-description" value="My first digital object on Nervos CKB" maxlength="512" autocomplete="off"></div>
+              <div class="field"><label for="dob-content-type">Content Type</label><input id="dob-content-type" value="text/plain" maxlength="96" required autocomplete="off"></div>
+              <div class="field"><label for="dob-content">Content</label><input id="dob-content" value="Hello CKB DOB!" maxlength="1536" required autocomplete="off"></div>
+              <button class="primary" type="submit">Create DOB</button>
+              <p class="hint">UTF-8 text: name ≤128 bytes, description ≤512 bytes, content ≤1536 bytes; encoded JSON ≤4096 bytes. Occupied Cell capacity and transaction fees are paid in CKB by Account #0.</p>
+            </fieldset></form>
+            <p id="dob-create-message" class="feedback" role="status" aria-live="polite"></p>
+          </section>
+          <section class="panel" aria-labelledby="dob-view-title">
+            <p class="eyebrow">Step 2</p><h3 id="dob-view-title">View Digital Object</h3>
+            <form id="dob-view-form" class="step-fields">
+              <div class="field field-wide"><label for="dob-object-id">Object ID (TYPE_ID args)</label><input id="dob-object-id" placeholder="0x… (64 hex characters)" pattern="0x[0-9a-fA-F]{64}" required spellcheck="false" autocomplete="off"></div>
+              <button id="dob-view-button" type="submit">View DOB</button>
+            </form>
+            <p id="dob-view-message" class="feedback" role="status" aria-live="polite"></p>
+            <div id="dob-object-detail" hidden>
+              <dl id="dob-object-meta" class="metadata"></dl>
+              <h4>On-chain content (displayed as text)</h4><pre id="dob-onchain-content"></pre>
+              <details><summary>Inspect Cell, scripts and data origin</summary><pre id="dob-cell-detail"></pre></details>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="dob-transfer-title">
+            <p class="eyebrow">Step 3</p><h3 id="dob-transfer-title">Transfer Digital Object</h3>
+            <form id="dob-transfer-form"><fieldset id="dob-transfer-fields" class="step-fields" disabled>
+              <div class="field"><label for="dob-select">DOB</label><select id="dob-select" required><option value="">Create a DOB first</option></select></div>
+              <div class="field"><label for="dob-receiver-account">Receiver Account</label><select id="dob-receiver-account"><option value="">Enter address below</option></select></div>
+              <div class="field field-wide"><label for="dob-receiver">Receiver address</label><input id="dob-receiver" placeholder="ckt1…" required spellcheck="false" autocomplete="off"></div>
+              <button class="primary" type="submit">Transfer DOB</button>
+              <p class="hint">The current owner signs. Account #0 uses the existing backend key. Further transfers from Account #1 require its optional backend key. The new owner is shown after commitment.</p>
+            </fieldset></form>
+            <p id="dob-transfer-message" class="feedback" role="status" aria-live="polite"></p>
+          </section>
+          <section class="panel" aria-labelledby="dob-config-title">
+            <p class="eyebrow">Protocol &amp; verification</p><h3 id="dob-config-title">Custom Cell + TYPE_ID</h3>
+            <p class="muted">Object ID is the 32-byte TYPE_ID args. A transfer consumes the current Cell and creates one replacement Cell with the same type and data, locked to the receiver.</p>
+            <p class="muted">TYPE_ID is built into CKB; no DOB contract deployment is needed. An owner using an external transaction can change the data or destroy the Cell. This application detects data changes and refuses to transfer them.</p>
+            <button id="dob-refresh" type="button">Refresh DOBs &amp; history</button>
+            <details><summary>Inspect local script configuration &amp; dependencies</summary><pre id="dob-script-info">Not loaded.</pre></details>
+          </section>
+        </div>
+        <section class="panel" aria-labelledby="dob-history-title">
+          <div class="section-heading"><h3 id="dob-history-title">Transaction History</h3><span id="dob-pending-count" class="badge">0 pending</span></div>
+          <p id="dob-action-message" class="feedback" role="status" aria-live="polite"></p>
+          <button id="dob-retry" type="button" hidden>Retry same submission</button>
+          <p id="dob-history-message" class="muted">No operations loaded.</p>
+          <div class="table-scroll"><table id="dob-history-table" hidden><caption class="sr-only">DOB creation and transfer transactions, with current verified ownership.</caption><thead><tr><th>Operation</th><th>Object ID</th><th>Transaction hash</th><th>Status</th><th>Block</th><th>Current owner</th><th>Details</th></tr></thead><tbody id="dob-history-body"></tbody></table></div>
+        </section>
+        <section class="panel" aria-labelledby="dob-inspect-title">
+          <div class="section-heading"><h3 id="dob-inspect-title">Transaction &amp; Cell inspection</h3><button id="dob-refresh-transaction" type="button" disabled>Refresh transaction</button></div>
+          <form id="dob-transaction-form" class="inline-form"><div><label for="dob-transaction-hash">Transaction hash</label><input id="dob-transaction-hash" pattern="0x[0-9a-fA-F]{64}" placeholder="0x…" required autocomplete="off" spellcheck="false"></div><button id="dob-inspect-button" type="submit">Inspect</button></form>
+          <p id="dob-transaction-message" class="feedback" role="status" aria-live="polite"></p>
+          <div id="dob-transaction-detail" hidden>
+            <div class="hash-row"><code id="dob-selected-hash"></code><button id="dob-copy-hash" type="button">Copy hash</button><span id="dob-selected-status" class="badge"></span></div>
+            <dl id="dob-transaction-meta" class="metadata"></dl>
+            <details><summary>Inspect transaction inputs, outputs, data and dependencies</summary><pre id="dob-transaction-json"></pre></details>
+          </div>
+        </section>
+      </section>
+      <section id="panel-lock" role="tabpanel" aria-labelledby="tab-lock" hidden>
+        <div class="module-heading"><div><p class="eyebrow">Week 01 / 06</p><h2>Lock Script</h2><p>Lock a Cell to Account #0, test a different signing key, then spend with its owner.</p></div><button id="lock-refresh" type="button">Refresh Lock Script</button></div>
+        <p id="lock-message" class="feedback" role="status" aria-live="polite"></p>
+        <button id="lock-retry" type="button" hidden>Retry same submission</button>
+        <div class="workflow-grid">
+          <section class="panel" aria-labelledby="lock-info-title">
+            <p class="eyebrow">Step 1</p><h3 id="lock-info-title">Inspect Lock Script</h3>
+            <p class="muted">Standard Secp256k1 / Blake160 from this OffCKB Devnet. No separate custom contract is deployed.</p>
+            <dl id="lock-info" class="metadata"></dl>
+            <details><summary>Script deployment and Cell dependencies</summary><pre id="lock-dependencies">Load the module to inspect actual Devnet dependencies.</pre></details>
+          </section>
+          <section class="panel" aria-labelledby="lock-create-title">
+            <p class="eyebrow">Step 2</p><h3 id="lock-create-title">Create Locked Cell</h3>
+            <form id="lock-create-form"><fieldset id="lock-create-fields" disabled>
+              <label for="lock-owner">Authorized owner</label><select id="lock-owner" required><option value="0">Account #0</option></select>
+              <label for="lock-capacity">Capacity (CKB)</label><input id="lock-capacity" type="text" inputmode="decimal" pattern="(0|[1-9][0-9]*)(\.[0-9]{1,8})?" value="100" maxlength="24" required>
+              <p id="lock-capacity-hint" class="hint">Minimum capacity includes the lock and one byte of lesson data. Funding also pays the transaction fee.</p>
+              <button type="submit" class="primary">Sign &amp; create Cell</button>
+            </fieldset></form>
+            <p id="lock-create-result" class="feedback" role="status" aria-live="polite"></p>
+          </section>
+          <section class="panel" aria-labelledby="lock-unauthorized-title">
+            <p class="eyebrow">Step 3</p><h3 id="lock-unauthorized-title">Test Unauthorized Spending</h3>
+            <form id="lock-test-form"><fieldset id="lock-test-fields" disabled>
+              <label for="lock-cell">Locked Cell outpoint</label><select id="lock-cell" required><option value="">Create a locked Cell first</option></select>
+              <p class="hint">Uses Account #1's backend key when available, otherwise an ephemeral unauthorized key. Runs both signatures through Devnet estimate_cycles. The Cell is never broadcast for spending.</p>
+              <button type="submit">Test unauthorized signature</button>
+            </fieldset></form>
+            <p id="lock-test-result" class="feedback" role="status" aria-live="polite"></p>
+            <details><summary>Actual validation error and signature proof</summary><pre id="lock-test-proof">No authorization test has run.</pre></details>
+          </section>
+          <section class="panel" aria-labelledby="lock-spend-title">
+            <p class="eyebrow">Step 4</p><h3 id="lock-spend-title">Authorized Spending</h3>
+            <p id="lock-spend-input" class="muted">Select a live locked Cell in Step 3.</p>
+            <form id="lock-spend-form"><fieldset id="lock-spend-fields" disabled>
+              <label for="lock-destination-account">Destination account</label><select id="lock-destination-account"><option value="">Enter address below</option></select>
+              <label for="lock-destination">Destination address</label><input id="lock-destination" placeholder="ckt1…" maxlength="200" required autocomplete="off" spellcheck="false">
+              <p class="hint">Account #0 signs. The selected Cell is the only input; its capacity minus the fee goes to output 0. Complete Step 3 successfully first.</p>
+              <button type="submit" class="primary">Sign &amp; spend with Account #0</button>
+            </fieldset></form>
+            <p id="lock-spend-result" class="feedback" role="status" aria-live="polite"></p>
+          </section>
+          <section class="panel" aria-labelledby="lock-verification-title">
+            <p class="eyebrow">Step 5</p><h3 id="lock-verification-title">Transaction Verification</h3>
+            <form id="lock-inspect-form" class="inline-form"><div><label for="lock-hash">Transaction hash</label><input id="lock-hash" pattern="0x[0-9a-fA-F]{64}" required placeholder="0x…" autocomplete="off" spellcheck="false"></div><button type="submit">Inspect</button></form>
+            <p id="lock-inspect-result" class="feedback" role="status" aria-live="polite"></p>
+            <dl id="lock-transaction-meta" class="metadata"></dl>
+            <ul id="lock-checks"></ul>
+            <details><summary>Input outpoints, outputs, live status and dependencies</summary><pre id="lock-transaction-json">No transaction selected.</pre></details>
+          </section>
+        </div>
+        <section class="panel" aria-labelledby="lock-history-title"><h3 id="lock-history-title">Transaction history</h3><p id="lock-history-message" class="muted">No Lock Script transactions recorded.</p>
+          <div class="table-scroll"><table id="lock-history" hidden><caption class="sr-only">Lock Script funding and authorized spending transactions</caption><thead><tr><th>Operation</th><th>Transaction hash</th><th>Output</th><th>Status</th><th>Block</th><th>Details</th></tr></thead><tbody id="lock-history-body"></tbody></table></div>
+        </section>
+      </section>
+    </div>
+    <footer>CKBuilder Learning Lab · Transactions use your local devnet accounts.</footer>
+    <noscript><p>This workflow requires JavaScript to connect to the local devnet API.</p></noscript>
+  </main>
+</body>
+</html>
