@@ -1,0 +1,26 @@
+{
+  "name": "ckb-simple-dapp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite --host 0.0.0.0 --port 3010 --strictPort",
+    "dev": "npm start",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview --host 0.0.0.0 --port 3011 --strictPort"
+  },
+  "dependencies": {
+    "@ckb-ccc/connector-react": "2.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^5.2.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.8"
+  },
+  "engines": { "node": "^20.19.0 || >=22.12.0" }
+}

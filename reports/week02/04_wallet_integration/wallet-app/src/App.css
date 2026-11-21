@@ -1,0 +1,119 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  color: #111827;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 760px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+h2 {
+  margin: 24px 0 12px;
+  font-size: 20px;
+}
+
+.subtitle {
+  margin: 8px 0 24px;
+  color: #6b7280;
+}
+
+.row,
+.field {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.field.vertical {
+  display: block;
+}
+
+.field.vertical span {
+  display: block;
+  margin-bottom: 8px;
+  color: #6b7280;
+}
+
+.row span,
+.field span {
+  color: #6b7280;
+}
+
+.actions {
+  margin: 20px 0;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #ef4444;
+}
+
+button:hover {
+  opacity: 0.92;
+}
+
+.ok {
+  color: #16a34a;
+}
+
+.off {
+  color: #dc2626;
+}
+
+code {
+  display: block;
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.note {
+  color: #2563eb;
+  margin-top: 12px;
+}
+
+.error {
+  color: #dc2626;
+  margin-top: 12px;
+}
