@@ -1,8 +1,20 @@
+# Dependencies and package cache
 node_modules/
+.pnpm-store/
+
+# Build outputs and tool cache
 dist/
 build/
+target/
 .vite/
 coverage/
 *.tsbuildinfo
-*.log
 .cache/
+
+# Python environment and bytecode
+.venv/
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log

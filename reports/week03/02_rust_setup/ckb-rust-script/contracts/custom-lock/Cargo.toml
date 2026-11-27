@@ -1,0 +1,12 @@
+[package]
+name = "custom-lock"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ckb-hash = { version = "1.1.1", default-features = false, features = ["ckb-contract"] }
+ckb-std = "1.1"
+
+[features]
+library = []
+native-simulator = ["library", "ckb-std/native-simulator"]
